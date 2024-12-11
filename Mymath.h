@@ -4,6 +4,14 @@
 #include <cmath>
 #include <assert.h>
 
+//Quaternion
+struct Quaternion {
+	float x;
+	float y;
+	float z;
+	float w;
+};
+
 Vector3 operator-=(Vector3& v1, const Vector3& v2) {
 	v1.x -= v2.x;
 	v1.y -= v2.x;
@@ -458,4 +466,30 @@ Vector3 Project(const Vector3& a, const Vector3& b) {
 	float scalar = dotProduct / magnitudeSquared;
 
 	return Multiply(b, scalar);
+}
+//Quaternionの積
+Quaternion Multiply(const Quaternion& lhs, const Quaternion& rhs) {
+	
+	const float qr = (lhs.w * rhs.w) - (lhs.x * rhs.x) - (lhs.y - rhs.y) - (lhs.z - rhs.z);
+}
+//単位Quaternionを返す
+Quaternion IdentityQuaternion() {
+	
+}
+//共役Quaternionを返す
+Quaternion Conjugate(const Quaternion& quaternion) {
+	const float qq =
+		quaternion.w - quaternion.x - quaternion.y - quaternion.z;
+}
+//Quaternionのnormを返す
+float Norm(const Quaternion& quaternion) {
+
+}
+//正規化したQuaternionを返す
+Quaternion Normalize(const Quaternion& quaternion) {
+
+}
+//逆Quaternionを返す
+Quaternion Inverse(const Quaternion& quaternion) {
+
 }
