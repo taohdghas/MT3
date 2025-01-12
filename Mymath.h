@@ -470,26 +470,45 @@ Vector3 Project(const Vector3& a, const Vector3& b) {
 //Quaternionの積
 Quaternion Multiply(const Quaternion& lhs, const Quaternion& rhs) {
 	
-	const float qr = (lhs.w * rhs.w) - (lhs.x * rhs.x) - (lhs.y - rhs.y) - (lhs.z - rhs.z);
+	Quaternion result;
+	result.x = lhs.w * rhs.x + lhs.x * rhs.w + lhs.y * rhs.z - lhs.z * rhs.y;
+	result.y = lhs.w * rhs.y - lhs.x * rhs.z + lhs.y * rhs.w + lhs.z * rhs.x;
+	result.z = lhs.w * rhs.z + lhs.x * rhs.y - lhs.y * rhs.x + lhs.z * rhs.w;
+	result.w = lhs.w * rhs.w - lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z;
+
+	return result;
 }
 //単位Quaternionを返す
 Quaternion IdentityQuaternion() {
-	
+	return Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
 }
 //共役Quaternionを返す
 Quaternion Conjugate(const Quaternion& quaternion) {
-	const float qq =
-		quaternion.w - quaternion.x - quaternion.y - quaternion.z;
+	return Quaternion(-quaternion.x, -quaternion.y, -quaternion.z, quaternion.w);
 }
 //Quaternionのnormを返す
 float Norm(const Quaternion& quaternion) {
-
+	return sqrt(quaternion.x * quaternion.x + quaternion.y * quaternion.y +
+		quaternion.z * quaternion.z + quaternion.w * quaternion.w);
 }
 //正規化したQuaternionを返す
 Quaternion Normalize(const Quaternion& quaternion) {
+	float norm = Norm(quaternion);
 
+	if (norm == 0.0f) {
+		return IdentityQuaternion();
+	}
+	return Quaternion(quaternion.x / norm, quaternion.y / norm, quaternion.z / norm, quaternion.w / norm);
 }
 //逆Quaternionを返す
 Quaternion Inverse(const Quaternion& quaternion) {
+	float normsquared = quaternion.x * quaternion.x + quaternion.y * quaternion.y +
+		quaternion.z * quaternion.z + quaternion.w * quaternion.w;
+	if (normsquared == 0.0f) {
+		return IdentityQuaternion();
+	}
+	Quaternion conjugate = Conjugate(quaternion);
 
+	return Quaternion(conjugate.x / normsquared, conjugate.y / normsquared,
+		conjugate.z / normsquared, conjugate.w / normsquared);
 }
