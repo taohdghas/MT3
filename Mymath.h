@@ -89,6 +89,10 @@ Vector3 operator*(const Vector3& v, float s) { return s * v; }
 Vector3 operator*(const Vector3& v1, const Vector3& v2) { return Multiply(v1, v2); }
 Vector3 operator/(const Vector3& v, float s) { return Multiply(1.0f / s, v); }
 Matrix4x4 operator*(const Matrix4x4& m1, const Matrix4x4& m2) { return Multiply(m1, m2); }
+Quaternion operator-(const Quaternion& q) {return { -q.x, -q.y, -q.z, -q.w };}
+Quaternion operator*(const Quaternion& q, float scalar) {return { q.x * scalar, q.y * scalar, q.z * scalar, q.w * scalar };}
+Quaternion operator*(float scalar, const Quaternion& q) { return { scalar * q.x,scalar * q.y,scalar * q.z,scalar * q.w }; }
+Quaternion operator+(const Quaternion& q1, const Quaternion& q2) {return { q1.x + q2.x, q1.y + q2.y, q1.z + q2.z, q1.w + q2.w };}
 
 Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip) {
 	Matrix4x4 perspectiveMatrix;
@@ -590,4 +594,26 @@ Matrix4x4 MakeRotateMatrix(const Quaternion& quaternion) {
 	rotationMatrix.m[3][3] = 1.0f;
 
 	return rotationMatrix;
+}
+
+//球面線形補間
+Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float t) {
+	
+	float dot = q0.x * q1.x + q0.y * q1.y + q0.z * q1.z + q0.w * q1.w;
+
+	Quaternion q1Mod = q1; 
+
+	if (dot < 0.0f) {
+		q1Mod = -q1;
+		dot = -dot;
+	}
+
+
+	float theta = std::acos(dot);
+	float sinTheta = std::sin(theta);
+
+	float scale0 = std::sin((1.0f - t) * theta) / sinTheta;
+	float scale1 = std::sin(t * theta) / sinTheta;
+
+	return q0 * scale0 + q1Mod * scale1;
 }
