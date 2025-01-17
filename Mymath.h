@@ -512,3 +512,82 @@ Quaternion Inverse(const Quaternion& quaternion) {
 	return Quaternion(conjugate.x / normsquared, conjugate.y / normsquared,
 		conjugate.z / normsquared, conjugate.w / normsquared);
 }
+//任意軸回転を表すQuaternionの生成
+Quaternion MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle) {
+
+	Vector3 normalizedAxis = Normalize(axis);
+
+	float halfAngle = angle * 0.5f;
+	float sinHalfAngle = sinf(halfAngle);
+	float cosHalfAngle = cosf(halfAngle);
+
+	Quaternion quaternion;
+	quaternion.x = normalizedAxis.x * sinHalfAngle;
+	quaternion.y = normalizedAxis.y * sinHalfAngle;
+	quaternion.z = normalizedAxis.z * sinHalfAngle;
+	quaternion.w = cosHalfAngle;
+
+	return quaternion;
+}
+
+//ベクトルをQuaternionで回転させた結果のベクトルを求める
+Vector3 RotateVector(const Vector3& vector, const Quaternion& quaternion) {
+
+	Quaternion conjugate = Conjugate(quaternion);
+
+	Quaternion vectorQuat = {
+		vector.x,
+		vector.y,
+		vector.z,
+		0.0f
+	};
+
+	Quaternion rotatedQuat = Multiply(Multiply(quaternion, vectorQuat), conjugate);
+
+	return Vector3{
+		rotatedQuat.x,
+		rotatedQuat.y,
+		rotatedQuat.z
+	};
+}
+//Quaternionから回転行列を求める
+Matrix4x4 MakeRotateMatrix(const Quaternion& quaternion) {
+	
+	float w = quaternion.w;
+	float x = quaternion.x;
+	float y = quaternion.y;
+	float z = quaternion.z;
+
+	float xx = x * x;
+	float yy = y * y;
+	float zz = z * z;
+	float xy = x * y;
+	float xz = x * z;
+	float yz = y * z;
+	float wx = w * x;
+	float wy = w * y;
+	float wz = w * z;
+
+	Matrix4x4 rotationMatrix;
+	rotationMatrix.m[0][0] = 1.0f - 2.0f * (yy + zz);
+	rotationMatrix.m[0][1] = 2.0f * (xy + wz);
+	rotationMatrix.m[0][2] = 2.0f * (xz - wy);
+	rotationMatrix.m[0][3] = 0.0f;
+
+	rotationMatrix.m[1][0] = 2.0f * (xy - wz);
+	rotationMatrix.m[1][1] = 1.0f - 2.0f * (xx + zz);
+	rotationMatrix.m[1][2] = 2.0f * (yz + wx);
+	rotationMatrix.m[1][3] = 0.0f;
+
+	rotationMatrix.m[2][0] = 2.0f * (xz + wy);
+	rotationMatrix.m[2][1] = 2.0f * (yz - wx);
+	rotationMatrix.m[2][2] = 1.0f - 2.0f * (xx + yy);
+	rotationMatrix.m[2][3] = 0.0f;
+
+	rotationMatrix.m[3][0] = 0.0f;
+	rotationMatrix.m[3][1] = 0.0f;
+	rotationMatrix.m[3][2] = 0.0f;
+	rotationMatrix.m[3][3] = 1.0f;
+
+	return rotationMatrix;
+}
